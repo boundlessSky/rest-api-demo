@@ -3,8 +3,9 @@
  */
 package com.clare.config;
 
-import java.lang.reflect.Method;
-
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
@@ -18,9 +19,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.lang.reflect.Method;
 
 /**
  * Redis缓存配置类
@@ -65,7 +64,7 @@ public class RedisConfig extends CachingConfigurerSupport {
 	public CacheManager cacheManager(@SuppressWarnings("rawtypes") RedisTemplate redisTemplate) {
 		RedisCacheManager rcm = new RedisCacheManager(redisTemplate);
 		// 设置缓存过期时间，秒
-		rcm.setDefaultExpiration(60);
+		rcm.setDefaultExpiration(600);
 		return rcm;
 	}
 	

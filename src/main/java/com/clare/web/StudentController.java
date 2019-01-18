@@ -2,11 +2,11 @@ package com.clare.web;
 
 import com.clare.domain.Student;
 import com.clare.mapper.StudentMapper;
+import com.clare.service.StudentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,13 +17,14 @@ public class StudentController {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	@Autowired
 	private StudentMapper studentMapper;
+	@Autowired
+	private StudentService studentService;
 
-	@Cacheable(value = "testallCache")
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public List<Student> getStudentList() {
 		// 处理"/students/"的GET请求，用来获取Student列表
 		// 还可以通过@RequestParam从页面中传递参数来进行查询条件或者翻页信息的传递
-		return studentMapper.findAll();
+		return studentService.findAll();
 	}
 
 	/**
@@ -36,7 +37,7 @@ public class StudentController {
 	public String postStudent(@RequestBody Student stu) {
 		String result = "failure";
 		try {
-			int insertId = studentMapper.insert(stu);
+			int insertId = studentService.insert(stu);
 			if (insertId > 0) {
 				result = "success";
 				ObjectMapper mapper = new ObjectMapper();
@@ -53,34 +54,32 @@ public class StudentController {
 	public Student getStudent(@PathVariable Integer id) {
 		// 处理"/students/{id}"的GET请求，用来获取url中id值的Student信息
 		// url中的id可通过@PathVariable绑定到函数的参数中
-		return studentMapper.selectByPrimaryKey(id);
+		return studentService.selectByPrimaryKey(id);
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-	public String putUser(@PathVariable Integer id, @RequestBody Student stu) {
-		// 处理"/users/{id}"的PUT请求，用来更新User信息
-		String result = "failure";
+	public Student putUser(@PathVariable Integer id, @RequestBody Student stu) {
+		// 处理"/students/{id}"的PUT请求，用来更新User信息
+		Student student = null;
 		try {
 			stu.setId(id);
-			int updateId = studentMapper.updateByPrimaryKeySelective(stu);
-			if (updateId > 0) {
-				result = "success";
-				ObjectMapper mapper = new ObjectMapper();
-				String str = mapper.writeValueAsString(stu);
-				logger.info("update student success, new info {}", str);
-			}
+			student = studentService.updateByPrimaryKeySelective(stu);
+			ObjectMapper mapper = new ObjectMapper();
+			String str = mapper.writeValueAsString(stu);
+			logger.info("update student success, new info {}", str);
 		} catch (Exception e) {
 			logger.error("", e);
 		}
-		return result;
+		return student;
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	public String deleteStudent(@PathVariable Integer id) {
 		// 处理"/students/{id}"的DELETE请求，用来删除Student
-		studentMapper.deleteByPrimaryKey(id);
+		studentService.deleteByPrimaryKey(id);
 		logger.info("delete student id={}", id);
 		return "success";
 	}
+
 
 }
